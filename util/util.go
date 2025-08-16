@@ -1,0 +1,74 @@
+package util
+
+import (
+	"fmt"
+	"os"
+)
+
+var Sprite = [16][5]uint8{
+	{0xF0, 0x90, 0x90, 0x90, 0xF0},
+	{0x20, 0x60, 0x20, 0x20, 0x70},
+	{0xF0, 0x10, 0xF0, 0x80, 0xF0},
+	{0xF0, 0x10, 0xF0, 0x10, 0xF0},
+	{0x90, 0x90, 0xF0, 0x10, 0x10},
+	{0xF0, 0x80, 0xF0, 0x10, 0xF0},
+	{0xF0, 0x80, 0xF0, 0x90, 0xF0},
+	{0xF0, 0x10, 0x20, 0x40, 0x40},
+	{0xF0, 0x90, 0xF0, 0x90, 0xF0},
+	{0xF0, 0x90, 0xF0, 0x10, 0xF0},
+	{0xF0, 0x90, 0xF0, 0x90, 0x90},
+	{0xE0, 0x90, 0xE0, 0x90, 0xE0},
+	{0xF0, 0x80, 0x80, 0x80, 0xF0},
+	{0xE0, 0x90, 0x90, 0x90, 0xE0},
+	{0xF0, 0x80, 0xF0, 0x80, 0xF0},
+	{0xF0, 0x80, 0xF0, 0x80, 0x80},
+}
+
+func GetMappedKey(key rune) uint8 {
+	if key >= '0' && key <= '9' {
+		return uint8(int(key) - int('0'))
+	} else if key >= 'a' && key <= 'z' {
+		return uint8(int(key) - int('a'))
+	} else if key >= 'A' && key <= 'Z' {
+		return uint8(int(key) - int('A'))
+	}
+	return 16
+}
+
+func SpriteAddress(digit uint8) uint16 {
+	return uint16(0x100) + uint16(digit*5)
+}
+
+func InitMemory(path string, memory *[1 << 12]uint8) bool {
+	// Init Game ROM
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Printf("Error opening the file :: %s\n", err.Error())
+		return false
+	}
+	defer file.Close()
+	buffer := make([]byte, 1)
+	pc := 0x200
+	for {
+		_, err := file.Read(buffer)
+		if err != nil {
+			if err.Error() == "EOF" {
+				break
+			}
+			fmt.Printf("Error reading byte ::  %s\n", err.Error())
+			return false
+		}
+		memory[pc] = uint8(buffer[0])
+		pc += 1
+	}
+
+	// Init sprite data
+	pc = 0x100
+	for _, sp := range Sprite {
+		for i := 0; i < 5; i += 1 {
+			memory[pc] = sp[i]
+			pc += 1
+		}
+	}
+	return true
+}
