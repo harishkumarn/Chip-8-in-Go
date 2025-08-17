@@ -57,7 +57,6 @@ func (d *Display) DrawAtPosition(x, y uint8, data []uint8) {
 	for i, val := range data {
 		for j := range 8 {
 			if val&(1<<j) > 0 {
-				fmt.Println("Setting pixel", val)
 				d.fb[int(y)+i][int(x)+7-j] = true
 			}
 		}
