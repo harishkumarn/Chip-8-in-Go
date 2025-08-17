@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/harishkumarn/Chip-8-in-Go/engine/processor"
@@ -8,9 +9,10 @@ import (
 )
 
 func StartEmulation(romPath string, wg *sync.WaitGroup) {
-	defer wg.Done() // Needed ?
+	defer wg.Done()
 	proc := processor.Processor{}
 	util.InitMemory(romPath, &proc.Memory)
 	proc.Init()
+	fmt.Println("Starting the processor")
 	proc.Run()
 }
